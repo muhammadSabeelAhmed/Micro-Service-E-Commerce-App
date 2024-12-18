@@ -1,0 +1,70 @@
+version: '3.8'
+services:
+  #User Service
+  user-service:
+    build: ./UserService
+    ports:
+      - "5001:5000"
+    environment:
+      - MONGO_URI=mongodb://localhost:27017/users
+    depends_on:
+      - mongo
+  mongo:
+    image: mongo:latest
+    container_name: mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+  #Product Service
+  product-service:
+    build: ./ProductService
+    ports:
+      - "5002:5000"
+    environment:
+      - POSTGRES_URI=postgresql://postgres:password@postgres:5432/products  # PostgreSQL connection string
+    depends_on:
+      - postgres
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: products
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+  
+  #Order Service
+  order-service:
+    build: ./OrderService
+    ports:
+      - "5003:5000"
+    environment:
+      - MYSQL_URI=mysql://root:password@mysql:3306/orders  # MySQL connection string
+    depends_on:
+      - mysql
+  mysql:
+    image: mysql:latest
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: orders
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+
+ #Payment Service
+  payment-service:
+    build: ./PaymentService
+    ports:
+      - "5004:5000"
+
+volumes:
+  mongo-data:
+  postgres-data:
+  mysql-data:
